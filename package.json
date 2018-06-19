@@ -1,6 +1,6 @@
 {
-  "name": "@drooms/ng-metadata",
-  "version": "4.0.2",
+  "name": "@unifiedfactory/ng-metadata",
+  "version": "4.0.3",
   "description": "Angular 2 decorators and utils for Angular 1.x",
   "scripts": {
     "prepublish": "tsc",
@@ -31,13 +31,13 @@
   "homepage": "https://github.com/ngParty/ng-metadata#readme",
   "devDependencies": {
     "@angular/core": "2.4.1",
-    "@types/angular": "1.5.19",
+    "@types/angular": "^1.6.32",
     "@types/chai": "3.4.34",
     "@types/jquery": "2.0.34",
     "@types/mocha": "2.2.32",
     "@types/node": "6.0.46",
     "@types/sinon": "1.16.31",
-    "angular": "1.4.10",
+    "angular": "1.6.4",
     "chai": "3.5.0",
     "commitizen": "2.4.6",
     "concurrently": "2.1.0",
@@ -51,8 +51,8 @@
     "rxjs": "5.0.1",
     "sinon": "1.17.6",
     "systemjs": "0.19.6",
-    "ts-node": "1.7.0",
-    "typescript": "2.1.4",
+    "ts-node": "^6.0.0",
+    "typescript": "2.9.1",
     "validate-commit-msg": "2.0.0",
     "zone.js": "^0.7.2"
   },

@@ -39,7 +39,7 @@ export type ProvideNg2InjectableParams = {
  *  .factory(...downgradeNg2Injectable({injectable:Ng2ServiceDecorated, downgradeFn: downgradeInjectable}))
  * ```
  */
-export function downgradeNg2Injectable( { injectable, downgradeFn, token }: ProvideNg2InjectableParams ): [string|Function] {
+export function downgradeNg2Injectable( { injectable, downgradeFn, token }: ProvideNg2InjectableParams ): [string, Function] {
   const { name, factoryFn } = _downgradeInjectable( {
     token: token || injectable as any,
     injectable,

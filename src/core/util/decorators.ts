@@ -58,7 +58,7 @@ export function makeDecorator(
 
     }
 
-    function TypeDecorator( cls ): TypeDecorator {
+    function TypeDecorator<T>( cls: T | any ): T {
 
       /**
        * here we are creating generated name for Services

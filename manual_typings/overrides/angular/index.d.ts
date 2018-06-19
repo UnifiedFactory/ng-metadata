@@ -387,6 +387,7 @@ declare namespace ng {
     $setTouched(): void;
     $setUntouched(): void;
     $rollbackViewValue(): void;
+    $processModelValue(): void;
     $commitViewValue(): void;
     $isEmpty(value: any): boolean;
 

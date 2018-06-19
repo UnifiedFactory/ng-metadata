@@ -246,7 +246,9 @@ export function _getChildElements(
     ? 'querySelector'
     : 'querySelectorAll';
 
-  return global.angular.element( $element[ 0 ][ queryMethod ]( querySelector ) );
+  const method = $element[ 0 ][ queryMethod ] as (querySelector: string) => ng.IAugmentedJQuery;
+
+  return global.angular.element( method( querySelector ) );
 }
 
 

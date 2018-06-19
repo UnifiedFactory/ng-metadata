@@ -52,4 +52,7 @@ export abstract class NgModel implements ng.INgModelController {
   $isEmpty( value: any ): boolean {
     return undefined;
   }
+
+  $processModelValue(): void {
+  }
 }

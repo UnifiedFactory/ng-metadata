@@ -119,7 +119,7 @@ function __injectionArgs(fn, locals, serviceName){
  */
 export function getNg1InjectorMock(): ng.auto.IInjectorService {
   return {
-    instantiate( classFactory ){
+    instantiate( classFactory: { new(...args: any[]): any; } ){
       return new classFactory();
     },
     invoke(fn: Function, context?: any, locals?: any){
