@@ -55,4 +55,7 @@ export abstract class NgModel implements ng.INgModelController {
 
   $processModelValue(): void {
   }
+
+  $overrideModelOptions(options: ng.INgModelOptions): void {
+  }
 }
