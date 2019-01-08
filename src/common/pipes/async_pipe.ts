@@ -1,12 +1,9 @@
-import { Subscription } from 'rxjs/Subscription';
-import { Observable } from 'rxjs/Observable';
-
+import { Observable, Subscription } from 'rxjs';
 import { Pipe } from '../../core/pipes/decorators';
 import { PipeTransform } from '../../core/pipes/pipe_interfaces';
+import { isObservable, isPromiseOrObservable, isScope, isSubscription } from '../../facade/lang';
 
-import { isObservable, isScope, isSubscription, isPromiseOrObservable, isPresent } from '../../facade/lang';
-
-type StoredSubscription = ng.IPromise<any>|ng.IHttpPromise<any>|Subscription;
+type StoredSubscription = ng.IPromise<any> | ng.IHttpPromise<any> | Subscription;
 
 /**
  * Based on @cvuorinen angular1-async-filter implementation
@@ -38,36 +35,37 @@ type StoredSubscription = ng.IPromise<any>|ng.IHttpPromise<any>|Subscription;
  *
  * {@example core/pipes/ts/async_pipe/async_pipe_example.ts region='AsyncPipeObservable'}
  */
-@Pipe( { name: 'async'/*, pure: false*/ } )
+@Pipe({ name: 'async' /*, pure: false*/ })
 export class AsyncPipe implements PipeTransform {
-
   // Need a way to tell the input objects apart from each other (so we only subscribe to them once)
   private static nextObjectID: number = 0;
-  private static values: {[key: string]: any} = {};
-  private static subscriptions: {[key: string]: StoredSubscription} = {};
-  private static timeouts: {[key: string]: number} = {};
+  private static values: { [key: string]: any } = {};
+  private static subscriptions: { [key: string]: StoredSubscription } = {};
+  private static timeouts: { [key: string]: number } = {};
   private static TRACK_PROP_NAME = '__asyncFilterObjectID__';
 
-  private static _objectId( obj: any ): any {
-    if ( !obj.hasOwnProperty( AsyncPipe.TRACK_PROP_NAME ) ) {
-      obj[ AsyncPipe.TRACK_PROP_NAME ] = ++AsyncPipe.nextObjectID;
+  private static _objectId(obj: any): any {
+    if (!obj.hasOwnProperty(AsyncPipe.TRACK_PROP_NAME)) {
+      obj[AsyncPipe.TRACK_PROP_NAME] = ++AsyncPipe.nextObjectID;
     }
-    return obj[ AsyncPipe.TRACK_PROP_NAME ];
+    return obj[AsyncPipe.TRACK_PROP_NAME];
   }
 
-  private static _getSubscriptionStrategy( input: any ): ( value ) => StoredSubscription {
-    return input.subscribe && input.subscribe.bind( input )
-      || input.success && input.success.bind( input ) // To make it work with HttpPromise
-      || input.then.bind( input ); // To make it work with Promise
+  private static _getSubscriptionStrategy(input: any): (value) => StoredSubscription {
+    return (
+      (input.subscribe && input.subscribe.bind(input)) ||
+      (input.success && input.success.bind(input)) || // To make it work with HttpPromise
+      input.then.bind(input)
+    ); // To make it work with Promise
   }
 
-  private static _markForCheck( scope: ng.IScope, inputId: number ) {
-    if ( isScope( scope ) ) {
+  private static _markForCheck(scope: ng.IScope, inputId: number) {
+    if (isScope(scope)) {
       // clear previous timeout before starting new
       clearTimeout(AsyncPipe.timeouts[inputId]);
       // #perfmatters
       // wait till event loop is free and run just local digest so we don't get in conflict with other local $digest
-      AsyncPipe.timeouts[inputId] = setTimeout( ()=> {
+      AsyncPipe.timeouts[inputId] = setTimeout(() => {
         scope.$digest();
       });
       // we can't run local scope.$digest, because if we have multiple async pipes on the same scope 'infdig' error would occur :(
@@ -75,47 +73,47 @@ export class AsyncPipe implements PipeTransform {
     }
   }
 
-  private static _dispose( inputId: number ): void {
+  private static _dispose(inputId: number): void {
     // should prevent digest of destroyed scope
     clearTimeout(AsyncPipe.timeouts[inputId]);
     delete AsyncPipe.timeouts[inputId];
-    if ( isSubscription( AsyncPipe.subscriptions[ inputId ] ) ) {
-      (AsyncPipe.subscriptions[ inputId ] as Subscription).unsubscribe();
+    if (isSubscription(AsyncPipe.subscriptions[inputId])) {
+      (AsyncPipe.subscriptions[inputId] as Subscription).unsubscribe();
     }
-    delete AsyncPipe.subscriptions[ inputId ];
-    delete AsyncPipe.values[ inputId ];
+    delete AsyncPipe.subscriptions[inputId];
+    delete AsyncPipe.values[inputId];
   }
 
-  transform( input: Observable<any>|ng.IPromise<any>|ng.IHttpPromise<any>, scope?: ng.IScope ): any {
-
-    if ( !isPromiseOrObservable( input ) ) {
-      return input
+  transform(input: Observable<any> | ng.IPromise<any> | ng.IHttpPromise<any>, scope?: ng.IScope): any {
+    if (!isPromiseOrObservable(input)) {
+      return input;
     }
 
-    if ( isObservable( input ) && !isScope( scope ) ) {
-      throw new Error( 'AsyncPipe: you have to specify "this" as parameter so we can unsubscribe on scope.$destroy!' );
+    if (isObservable(input) && !isScope(scope)) {
+      throw new Error('AsyncPipe: you have to specify "this" as parameter so we can unsubscribe on scope.$destroy!');
     }
 
-    const inputId = AsyncPipe._objectId( input );
+    const inputId = AsyncPipe._objectId(input);
 
     // return cached immediately
-    if ( inputId in AsyncPipe.subscriptions ) {
-      return AsyncPipe.values[ inputId ];
+    if (inputId in AsyncPipe.subscriptions) {
+      return AsyncPipe.values[inputId];
     }
 
-    const subscriptionStrategy = AsyncPipe._getSubscriptionStrategy( input );
-    AsyncPipe.subscriptions[ inputId ] = subscriptionStrategy( _setSubscriptionValue );
+    const subscriptionStrategy = AsyncPipe._getSubscriptionStrategy(input);
+    AsyncPipe.subscriptions[inputId] = subscriptionStrategy(_setSubscriptionValue);
 
-    if ( isScope( scope ) ) {
+    if (isScope(scope)) {
       // Clean up subscription and its last value when the scope is destroyed.
-      scope.$on( '$destroy', () => { AsyncPipe._dispose( inputId ) } );
+      scope.$on('$destroy', () => {
+        AsyncPipe._dispose(inputId);
+      });
     }
 
-    function _setSubscriptionValue( value: any ): void {
-      AsyncPipe.values[ inputId ] = value;
+    function _setSubscriptionValue(value: any): void {
+      AsyncPipe.values[inputId] = value;
       // this is needed only for Observables
-      AsyncPipe._markForCheck( scope, inputId );
+      AsyncPipe._markForCheck(scope, inputId);
     }
-
   }
 }

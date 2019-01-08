@@ -48,7 +48,7 @@
     "live-server": "0.8.2",
     "mocha": "3.1.2",
     "reflect-metadata": "0.1.8",
-    "rxjs": "5.0.1",
+    "rxjs": "6.3.3",
     "sinon": "1.17.6",
     "systemjs": "0.19.6",
     "ts-node": "^6.0.0",
@@ -57,10 +57,12 @@
     "zone.js": "^0.7.2"
   },
   "peerDependencies": {
-    "rxjs": "^5.0.1",
+    "rxjs": "^6.3.3",
     "angular": ">=1.4.x"
   },
-  "dependencies": {},
+  "dependencies": {
+    "rxjs-compat": "6.3.3"
+  },
   "czConfig": {
     "path": "node_modules/cz-conventional-changelog"
   },

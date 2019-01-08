@@ -1,6 +1,5 @@
+import { Subject, Subscription } from 'rxjs';
 import { noop } from './lang';
-import { Subject } from 'rxjs/Subject';
-import { Subscription } from 'rxjs/Subscription';
 
 /**
  * Use by directives and components to emit custom Events.
@@ -51,7 +50,6 @@ export class EventEmitter<T> extends Subject<T> {
   // tslint:disable-next-line
   private __isAsync: boolean;
 
-
   /** @internal */
   private _ngExpressionBindingCb: ngEmitPayloadEvent<T> = noop;
 
@@ -59,25 +57,25 @@ export class EventEmitter<T> extends Subject<T> {
    * Creates an instance of [EventEmitter], which depending on [isAsync],
    * delivers events synchronously or asynchronously.
    */
-  constructor( isAsync: boolean = false ) {
+  constructor(isAsync: boolean = false) {
     super();
     this.__isAsync = isAsync;
   }
 
   /** @internal */
-  wrapNgExpBindingToEmitter( cb: Function ) {
+  wrapNgExpBindingToEmitter(cb: Function) {
     //used in reassignBindingsAndCreteEventEmitters to attach the original @Output binding to the instance new EventEmitter
-    this._ngExpressionBindingCb = ( cb as ngEmitPayloadEvent<T> );
+    this._ngExpressionBindingCb = cb as ngEmitPayloadEvent<T>;
     // this could create memory leaks because the subscription would be never terminated
     // super.subscribe((newValue)=>this._ngExpressionBindingCb({$event:newValue}));
   }
 
-  emit( value: T ) {
+  emit(value: T) {
     const payload = { $event: value };
     // push just the value
-    super.next( value );
+    super.next(value);
     // our & binding needs to be called via { $event: value } because Angular 1 locals
-    this._ngExpressionBindingCb( payload );
+    this._ngExpressionBindingCb(payload);
   }
 
   subscribe(generatorOrNext?: any, error?: any, complete?: any): Subscription {
@@ -87,37 +85,63 @@ export class EventEmitter<T> extends Subject<T> {
 
     if (generatorOrNext && typeof generatorOrNext === 'object') {
       schedulerFn = this.__isAsync
-        ? (value: any /** TODO #9100 */) => { setTimeout(() => generatorOrNext.next(value)) }
-        : (value: any /** TODO #9100 */) => { generatorOrNext.next(value) };
+        ? (value: any /** TODO #9100 */) => {
+            setTimeout(() => generatorOrNext.next(value));
+          }
+        : (value: any /** TODO #9100 */) => {
+            generatorOrNext.next(value);
+          };
 
       if (generatorOrNext.error) {
         errorFn = this.__isAsync
-          ? (err) => { setTimeout(() => generatorOrNext.error(err)) }
-          : (err) => { generatorOrNext.error(err) };
+          ? err => {
+              setTimeout(() => generatorOrNext.error(err));
+            }
+          : err => {
+              generatorOrNext.error(err);
+            };
       }
       if (generatorOrNext.complete) {
         completeFn = this.__isAsync
-          ? () => { setTimeout(() => generatorOrNext.complete()) }
-          : () => { generatorOrNext.complete() };
+          ? () => {
+              setTimeout(() => generatorOrNext.complete());
+            }
+          : () => {
+              generatorOrNext.complete();
+            };
       }
     } else {
       schedulerFn = this.__isAsync
-        ? (value: any /** TODO #9100 */) => { setTimeout(() => generatorOrNext(value))}
-        : (value: any /** TODO #9100 */) => { generatorOrNext(value) };
+        ? (value: any /** TODO #9100 */) => {
+            setTimeout(() => generatorOrNext(value));
+          }
+        : (value: any /** TODO #9100 */) => {
+            generatorOrNext(value);
+          };
 
       if (error) {
-        errorFn = this.__isAsync ? (err) => { setTimeout(() => error(err)) } : (err) => { error(err) };
+        errorFn = this.__isAsync
+          ? err => {
+              setTimeout(() => error(err));
+            }
+          : err => {
+              error(err);
+            };
       }
       if (complete) {
-        completeFn = this.__isAsync ? () => { setTimeout(() => complete()) } : () => { complete() };
+        completeFn = this.__isAsync
+          ? () => {
+              setTimeout(() => complete());
+            }
+          : () => {
+              complete();
+            };
       }
     }
 
-    return super.subscribe( schedulerFn, errorFn, completeFn );
+    return super.subscribe(schedulerFn, errorFn, completeFn);
   }
-
 }
-
 
 /**
  * Use by parent component to mark a function as an handler of a custom Event
@@ -150,5 +174,4 @@ export interface EventHandler<T> extends Function {
 }
 
 /** @internal */
-type ngEmitPayloadEvent<T> = ( $event: {$event: T} )=>void;
-
+type ngEmitPayloadEvent<T> = ($event: { $event: T }) => void;
